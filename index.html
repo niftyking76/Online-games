@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameHub - HTML5 Gaming Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1976d2;
+            --primary-dark: #1565c0;
+            --primary-light: #e3f2fd;
+            --text: #ffffff;
+            --text-secondary: #e0e0e0;
+            --bg-gradient: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        /* Header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(21, 101, 192, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: #ffeb3b;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 16px;
+        }
+
+        .nav-tab {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .nav-tab.active {
+            color: white;
+        }
+
+        .nav-tab i {
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 16px;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Game Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        @media (min-width: 480px) {
+            .games-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 640px) {
+            .games-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 768px) {
+            .games-grid {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .games-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .games-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            aspect-ratio: 1/1;
+            position: relative;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-thumbnail {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .game-title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            padding: 8px;
+            font-size: 0.85rem;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            aspect-ratio: 1/1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        /* Game Player Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .game-player {
+            width: 95%;
+            height: 80%;
+            max-width: 1200px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .game-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            z-index: 1001;
+        }
+
+        .close-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        /* Ripple Effect */
+        .ripple {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple-effect {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Loading More */
+        .load-more {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .load-more-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .load-more-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--primary-dark);
+            padding: 12px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Player Page (player.html) */
+        .player-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-header {
+            background: var(--primary-dark);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .player-title {
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player-frame {
+            flex: 1;
+            border: none;
+            background: black;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Home Page -->
+    <div id="home-page">
+        <header>
+            <div class="header-container">
+                <a href="#" class="logo">Game<span>Hub</span></a>
+                <div class="nav-tabs">
+                    <a href="#" class="nav-tab active ripple">
+                        <i class="fas fa-gamepad"></i>
+                        <span>Games</span>
+                    </a>
+                    <a href="#" class="nav-tab ripple">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Apps</span>
+                    </a>
+                    <a href="#" class="nav-tab ripple">
+                        <i class="fas fa-desktop"></i>
+                        <span>PC</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <h1 class="page-title">Popular Games</h1>
+            <div class="games-grid" id="games-container">
+                <!-- Games will be loaded here -->
+            </div>
+            <div class="load-more">
+                <button class="load-more-btn ripple" id="load-more">Load More</button>
+            </div>
+        </div>
+
+        <footer>
+            © 2023 GameHub - All Rights Reserved
+        </footer>
+
+        <!-- Game Player Modal -->
+        <div class="modal-overlay" id="game-modal">
+            <div class="game-player">
+                <iframe class="game-iframe" id="game-iframe" allowfullscreen></iframe>
+                <button class="close-btn ripple" id="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Player Page (hidden by default) -->
+    <div id="player-page" style="display: none;">
+        <div class="player-container">
+            <div class="player-header">
+                <button class="back-btn ripple" id="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2 class="player-title" id="player-title">Game Title</h2>
+            </div>
+            <iframe class="player-frame" id="player-frame" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        const games = [
+            {
+                id: 1,
+                title: "Zombie Shooter",
+                image: "https://img.gamedistribution.com/3e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/3e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 2,
+                title: "Car Racing 3D",
+                image: "https://img.gamedistribution.com/9e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/9e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 3,
+                title: "Bubble Shooter",
+                image: "https://img.gamedistribution.com/1e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/1e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 4,
+                title: "Puzzle Adventure",
+                image: "https://img.gamedistribution.com/2e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/2e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 5,
+                title: "Football Legends",
+                image: "https://img.gamedistribution.com/4e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/4e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 6,
+                title: "Tower Defense",
+                image: "https://img.gamedistribution.com/5e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/5e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 7,
+                title: "Space Invaders",
+                image: "https://img.gamedistribution.com/6e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/6e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 8,
+                title: "Snake Classic",
+                image: "https://img.gamedistribution.com/7e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/7e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 9,
+                title: "Jungle Run",
+                image: "https://img.gamedistribution.com/8e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/8e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 10,
+                title: "Pirate Battle",
+                image: "https://img.gamedistribution.com/0e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/0e7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 11,
+                title: "Dino Jump",
+                image: "https://img.gamedistribution.com/ae7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/ae7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            },
+            {
+                id: 12,
+                title: "Basketball Pro",
+                image: "https://img.gamedistribution.com/be7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e-512x512.jpeg",
+                url: "https://html5.gamedistribution.com/be7b4a1a0a3a4a7e9c4e3e3e3e3e3e3e/"
+            }
+        ];
+
+        // DOM Elements
+        const gamesContainer = document.getElementById('games-container');
+        const loadMoreBtn = document.getElementById('load-more');
+        const gameModal = document.getElementById('game-modal');
+        const gameIframe = document.getElementById('game-iframe');
+        const closeModalBtn = document.getElementById('close-modal');
+        const homePage = document.getElementById('home-page');
+        const playerPage = document.getElementById('player-page');
+        const playerFrame = document.getElementById('player-frame');
+        const playerTitle = document.getElementById('player-title');
+        const backButton = document.getElementById('back-button');
+
+        // Variables
+        let currentPage = 1;
+        const gamesPerPage = 8;
+        let isLoading = false;
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check if we're on the player page
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameUrl = urlParams.get('game');
+            const gameTitle = urlParams.get('title');
+
+            if (gameUrl) {
+                // Show player page
+                homePage.style.display = 'none';
+                playerPage.style.display = 'block';
+                playerFrame.src = gameUrl;
+                playerTitle.textContent = gameTitle || 'Game';
+            } else {
+                // Show home page
+                loadGames();
+                setupRippleEffects();
+            }
+        });
+
+        // Load games function
+        function loadGames() {
+            if (isLoading) return;
+            
+            isLoading = true;
+            
+            // Show skeleton loading
+            for (let i = 0; i < gamesPerPage; i++) {
+                const skeleton = document.createElement('div');
+                skeleton.className = 'skeleton';
+                gamesContainer.appendChild(skeleton);
+            }
+            
+            // Simulate loading delay
+            setTimeout(() => {
+                // Remove skeletons
+                while (gamesContainer.firstChild) {
+                    gamesContainer.removeChild(gamesContainer.firstChild);
+                }
+                
+                // Calculate games to show
+                const startIndex = (currentPage - 1) * gamesPerPage;
+                const endIndex = startIndex + gamesPerPage;
+                const gamesToShow = games.slice(0, endIndex);
+                
+                // Render games
+                gamesToShow.forEach(game => {
+                    const gameCard = document.createElement('div');
+                    gameCard.className = 'game-card ripple';
+                    gameCard.innerHTML = `
+                        <img src="${game.image}" alt="${game.title}" class="game-thumbnail" loading="lazy">
+                        <div class="game-title">${game.title}</div>
+                    `;
+                    
+                    gameCard.addEventListener('click', () => {
+                        // Check if mobile device
+                        if (window.innerWidth <= 768) {
+                            // Redirect to player page for mobile
+                            window.location.href = `?game=${encodeURIComponent(game.url)}&title=${encodeURIComponent(game.title)}`;
+                        } else {
+                            // Show modal for desktop
+                            gameIframe.src = game.url;
+                            gameModal.classList.add('active');
+                            document.body.style.overflow = 'hidden';
+                        }
+                    });
+                    
+                    gamesContainer.appendChild(gameCard);
+                });
+                
+                currentPage++;
+                isLoading = false;
+                
+                // Hide load more button if all games are loaded
+                if (endIndex >= games.length) {
+                    loadMoreBtn.style.display = 'none';
+                }
+            }, 1000);
+        }
+
+        // Load more games
+        loadMoreBtn.addEventListener('click', loadGames);
+
+        // Close modal
+        closeModalBtn.addEventListener('click', () => {
+            gameModal.classList.remove('active');
+            gameIframe.src = '';
+            document.body.style.overflow = 'auto';
+        });
+
+        // Back button for player page
+        backButton.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        // Ripple effect
+        function setupRippleEffects() {
+            document.querySelectorAll('.ripple').forEach(element => {
+                element.addEventListener('click', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const ripple = document.createElement('span');
+                    ripple.className = 'ripple-effect';
+                    ripple.style.left = `${x}px`;
+                    ripple.style.top = `${y}px`;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        }
+
+        // Infinite scroll
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
+                loadGames();
+            }
+        });
+    </script>
+</body>
+</html>
